@@ -68,14 +68,14 @@ class InMemoryUserRepository(UserRepository):
         self.ids_by_email = {}
 
 
-    def create_user(self, username: str, email: str, pwhash: str):
+    def create_user(self, username: str, email: str, pwhash: str, id: Optional[str] = None):
         '''
         Creates and adds a new User model instance to the repository
         Raises a ValueError exception upon ID collision
         '''
 
         user = User(
-            id=User.generate_id(),
+            id=id if id is not None else User.generate_id(),
             username=username,
             email=email,
             pwhash=pwhash,
@@ -104,8 +104,9 @@ class InMemoryUserRepository(UserRepository):
         Retrieves a user account based on the specified ID
         '''
         user = self.users_by_id.get(id, None)
-        if user is None:
+        if user is None or user.deleted_at is not None:
             return None
+
         return user.model_copy()
 
 
@@ -152,5 +153,4 @@ class InMemoryUserRepository(UserRepository):
 
         user.deleted_at = get_current_time()
         self.update_user(id, user)
-
 
