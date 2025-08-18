@@ -1,0 +1,22 @@
+[project]
+name = "ChatFlow"
+description = "Clariti Coding Interview"
+version = "1.0.0"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "fastapi[standard]<1.0,>=0.115",
+    "sqlmodel<1.0.0,>=0.0.24",
+    "aiosqlite<1.0,>=0.20",
+    "pydantic<3.0,>2.0",
+    "pydantic-settings<3.0,>=2.9.1",
+    "argon2-cffi>=25.1",
+    "mypy>=1.16,<2.0",
+    "ruff>=0.12.0,<1.0",
+    "pytest>=8.4,<9.0",
+    "httpx"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
