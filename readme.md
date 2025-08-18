@@ -13,7 +13,7 @@ And then activate it:
 
 `source .venv/bin/activate`
 
-From there install our dependencies using the follwoing command:
+From there install our dependencies using the following command:
 
 `uv pip install -r pyproject.toml`
 

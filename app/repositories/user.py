@@ -41,6 +41,14 @@ class UserRepository(ABC):
 
 
     @abstractmethod
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        '''
+        Retrieves a user account based on the specified username
+        '''
+        raise NotImplementedError()
+
+
+    @abstractmethod
     def update_user(self, id: str, user: User) -> None:
         '''
         Updates a user's data in the repository.
@@ -66,6 +74,7 @@ class InMemoryUserRepository(UserRepository):
     def __init__(self):
         self.users_by_id = {}
         self.ids_by_email = {}
+        self.ids_by_username = {}
 
 
     def create_user(self, username: str, email: str, pwhash: str, id: Optional[str] = None):
@@ -73,6 +82,16 @@ class InMemoryUserRepository(UserRepository):
         Creates and adds a new User model instance to the repository
         Raises a ValueError exception upon ID collision
         '''
+
+        if id is None:
+            id = User.generate_id()
+
+        if id in self.users_by_id:
+            raise ValueError(f"User with id={id} already exists in repository")
+        if email in self.ids_by_email:
+            raise ValueError(f"User with email address '{email}' already exists in repository")
+        if username in self.ids_by_username:
+            raise ValueError(f"User with username '{username}' already exists in repository")
 
         user = User(
             id=id if id is not None else User.generate_id(),
@@ -83,11 +102,9 @@ class InMemoryUserRepository(UserRepository):
             deleted_at=None
         )
 
-        if user.id in self.users_by_id:
-            raise ValueError(f"User with id={user.id} already exists in repository")
-
         self.users_by_id[user.id] = user
         self.ids_by_email[user.email] = user.id
+        self.ids_by_username[user.username] = user.id
 
         return user
 
@@ -120,6 +137,16 @@ class InMemoryUserRepository(UserRepository):
         return self.get_user_by_id(id)
 
 
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        '''
+        Retrieves a user account based on the specified username
+        '''
+        id = self.ids_by_username.get(username, None)
+        if id is None:
+            return None
+        return self.get_user_by_id(id)
+
+
     def update_user(self, id: str, user: User) -> None:
         '''
         Updates a user's data in the repository.
@@ -128,12 +155,20 @@ class InMemoryUserRepository(UserRepository):
         - ValueError if the 'id' field changes
         '''
 
+        # Check unique constraints
+        if self.ids_by_email.get(user.email, user.id) != user.id:
+            raise ValueError('Another user exists with that email address')
+        if self.ids_by_username.get(user.username, user.id) != user.id:
+            raise ValueError('Another user exists with that username')
+
+        # Grab the user record and confirm the ID hasn't changed
         record = self.get_user_by_id(id)
         if record is None:
             raise KeyError(f"User with id '{id}' cannot be found")
         if record.id != user.id:
             raise ValueError('Cannot change id')
 
+        # Make the change
         self.users_by_id[record.id] = user
 
         # Special case: we need to re-index if the email address changed

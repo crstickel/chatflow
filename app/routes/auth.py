@@ -13,9 +13,22 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 
 @router.post('/login', response_model=LoginResponseDTO)
 async def login(
+    app_engine: Annotated[AppDependencyCollection, Depends(engine)],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Any:
-    raise NotImplementedError()
+    token = AuthService(app_engine).login_user(
+        username=form_data.username,
+        password=form_data.password
+    )
+
+    if token is None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="invalid username or password")
+
+    return LoginResponseDTO(
+        access_token=token.id,
+        token_type='bearer',
+        expires_in=token.time_to_live
+    )
 
 
 @router.post('/register', response_model=PublicUserDTO)

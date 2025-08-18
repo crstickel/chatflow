@@ -92,6 +92,17 @@ def test_get_user_by_bad_email(populated_repository: UserRepository, test_user_e
     assert retrieved is None
 
 
+def test_get_user_by_username(populated_repository: UserRepository, test_user_name: str):
+    retrieved = populated_repository.get_user_by_username(test_user_name)
+    assert retrieved is not None
+    assert retrieved.username == test_user_name
+
+
+def test_get_user_by_bad_username(populated_repository: UserRepository, test_user_name: str):
+    retrieved = populated_repository.get_user_by_username('leeeeeeroyhhhhhnnnnjennnnnkins')
+    assert retrieved is None
+
+
 def test_update_user(populated_repository: UserRepository, test_user_id: str):
     user = populated_repository.get_user_by_id(test_user_id)
     user.pwhash = 'yetanotherhash'

@@ -1,11 +1,28 @@
 
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from functools import cached_property
-from typing import Self
+from typing import Annotated, Self
 
+from app.repositories.accesstoken import AccessTokenRepository, InMemoryAccessTokenRepository
 from app.repositories.user import UserRepository, InMemoryUserRepository
+from app.models.user import User
 
+from shared.time import get_current_time
+
+
+###################################################################################################
+#
+#   Application Dependency Collections
+#
+###################################################################################################
 
 class AppDependencyCollection:
+
+    @cached_property
+    def token_repository(self) -> AccessTokenRepository:
+        return InMemoryAccessTokenRepository()
+
 
     @cached_property
     def user_repository(self) -> UserRepository:
@@ -22,4 +39,62 @@ class AppDependencyCollection:
 
 
 engine = AppDependencyCollection()
+
+
+###################################################################################################
+#
+#   FastAPI Dependency-Injected Helpers
+#
+###################################################################################################
+
+# Specifies our desired OAuth2 access scheme
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
+
+
+# Dependency class for an OAuth2-compatible access token, to be
+# used for endpoints requiring authorization. Its inclusion in
+# the parameters of an endpoint handler will require a valid 
+# 'authorization' header
+AccessTokenDependency = Annotated[str, Depends(oauth2_scheme)]
+
+def get_user_from_token(
+    app_engine: Annotated[AppDependencyCollection, Depends(engine)],
+    token: AccessTokenDependency
+) -> User:
+    '''
+    Retrieves the user associated with the specified token
+    '''
+
+    # Grab the access token specified
+    access_token = app_engine.token_repository.get_token_by_id(token)
+
+    # Abort if the access token cannot be found or is revoked
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="forbidden"
+        )
+
+    # Abort if the token has expired
+    if access_token.expires_at < get_current_time():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="expired"
+        )
+
+    # If execution reaches here, we can use the token. Grab the user
+    # account associated with this token
+    user = app_engine.user_repository.get_user_by_id(access_token.user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="invalid token"
+        )
+
+    return user
+
+
+# Dependency class for the current authenticated user, to be used for
+# endpoints requring the user requesting the operation.
+CurrentUserDependency = Annotated[User, Depends(get_user_from_token)]
 
