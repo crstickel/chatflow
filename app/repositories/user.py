@@ -6,12 +6,20 @@ from app.models.user import User
 from shared.time import get_current_time
 
 
-class UserRespository(ABC):
+class UserRepository(ABC):
 
     @abstractmethod
     def create_user(self, id: str, username: str, email: str, pwhash: str):
         '''
         Creates and adds a new User model instance to the repository
+        '''
+        raise NotImplementedError()
+
+
+    @abstractmethod
+    def get_num_users(self) -> int:
+        '''
+        Returns the number of users currently being stored in this repository
         '''
         raise NotImplementedError()
 
@@ -53,7 +61,7 @@ class UserRespository(ABC):
 
 
 
-class InMemoryUserRepository(UserRespository):
+class InMemoryUserRepository(UserRepository):
 
     def __init__(self):
         self.users_by_id = {}
@@ -82,6 +90,13 @@ class InMemoryUserRepository(UserRespository):
         self.ids_by_email[user.email] = user.id
 
         return user
+
+
+    def get_num_users(self) -> int:
+        '''
+        Returns the number of users currently being stored in this repository
+        '''
+        return len(self.users_by_id)
 
 
     def get_user_by_id(self, id: str) -> Optional[User]:
