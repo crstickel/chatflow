@@ -9,7 +9,7 @@ from shared.time import get_current_time
 class AccessTokenRepository(ABC):
 
     @abstractmethod
-    def create_token(self, user_id: str):
+    def create_token(self, user_id: str) -> AccessToken:
         '''
         Creates and adds a new User model instance to the repository
         '''

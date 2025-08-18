@@ -5,6 +5,8 @@ from functools import cached_property
 from typing import Annotated, Self
 
 from app.repositories.accesstoken import AccessTokenRepository, InMemoryAccessTokenRepository
+from app.repositories.conversation import ConversationRepository, InMemoryConversationRepository
+from app.repositories.membership import MembershipRepository, InMemoryMembershipRepository
 from app.repositories.user import UserRepository, InMemoryUserRepository
 from app.models.user import User
 
@@ -18,6 +20,15 @@ from shared.time import get_current_time
 ###################################################################################################
 
 class AppDependencyCollection:
+
+    @cached_property
+    def conversation_repository(self) -> ConversationRepository:
+        return InMemoryConversationRepository()
+
+    @cached_property
+    def membership_repository(self) -> MembershipRepository:
+        return InMemoryMembershipRepository()
+
 
     @cached_property
     def token_repository(self) -> AccessTokenRepository:

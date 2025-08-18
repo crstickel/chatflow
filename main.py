@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.config import settings
-from app.routes import auth, user
+from app.routes import auth, conversations, users
 from app.dependencies import engine, AppDependencyCollection
 
 from shared.password import hash_password
@@ -17,6 +17,16 @@ async def lifespan(app: FastAPI):
         email='test@example.com',
         pwhash=hash_password('password')
     )
+    engine.user_repository.create_user(
+        username='alice',
+        email='alice@example.com',
+        pwhash=hash_password('password')
+    )
+    engine.user_repository.create_user(
+        username='bob',
+        email='bob@example.com',
+        pwhash=hash_password('password')
+    )
 
     # Finally, we can yield execution and start running the app
     yield
@@ -25,13 +35,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth.router)
-app.include_router(user.router)
+app.include_router(conversations.router)
+app.include_router(users.router)
 
 @app.get('/')
 async def root() -> str:
     return 'ChatFlow'
-
-
 
 
 if __name__ == '__main__':
