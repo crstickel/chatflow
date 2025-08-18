@@ -13,7 +13,8 @@ dependencies = [
     "mypy>=1.16,<2.0",
     "ruff>=0.12.0,<1.0",
     "pytest>=8.4,<9.0",
-    "httpx"
+    "httpx",
+    "email-validator"
 ]
 
 [build-system]

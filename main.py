@@ -1,9 +1,11 @@
 
 from fastapi import FastAPI
 
+from app.routes import auth
 from app.dependencies import engine, AppDependencyCollection
 
 app = FastAPI()
+app.include_router(auth.router)
 
 @app.get('/')
 async def root() -> str:
