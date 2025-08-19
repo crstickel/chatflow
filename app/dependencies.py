@@ -7,10 +7,10 @@ from sqlmodel import create_engine, Session
 from typing import Annotated, Self
 
 from app.config import settings
-from app.repositories.accesstoken import AccessTokenRepository, InMemoryAccessTokenRepository
-from app.repositories.conversation import ConversationRepository, InMemoryConversationRepository
-from app.repositories.membership import MembershipRepository, InMemoryMembershipRepository
-from app.repositories.user import UserRepository, InMemoryUserRepository, DbUserRepository
+from app.repositories.accesstoken import AccessTokenRepository, DbAccessTokenRepository
+from app.repositories.conversation import ConversationRepository, DbConversationRepository
+from app.repositories.membership import MembershipRepository, DbMembershipRepository
+from app.repositories.user import UserRepository, DbUserRepository
 from app.models.user import User
 
 from shared.time import get_current_time
@@ -22,31 +22,25 @@ from shared.time import get_current_time
 #
 ###################################################################################################
 
-# In-memory repositories
-_conversation_repository = InMemoryConversationRepository()
-_membership_repository = InMemoryMembershipRepository()
-_token_repository = InMemoryAccessTokenRepository()
-_user_repository = InMemoryUserRepository()
-
 class AppDependencyCollection:
 
     def __init__(self, session: Session):
         self.session = session
 
 
-    @property
+    @cached_property
     def conversation_repository(self) -> ConversationRepository:
-        return _conversation_repository
+        return DbConversationRepository(self.session)
 
 
-    @property
+    @cached_property
     def membership_repository(self) -> MembershipRepository:
-        return _membership_repository
+        return DbMembershipRepository(self.session)
 
 
-    @property
+    @cached_property
     def token_repository(self) -> AccessTokenRepository:
-        return _token_repository
+        return DbAccessTokenRepository(self.session)
 
 
     @cached_property

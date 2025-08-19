@@ -1,5 +1,6 @@
 
 from abc import ABC, abstractmethod
+from sqlmodel import Session
 from typing import Optional, List
 
 from app.models.accesstoken import AccessToken
@@ -74,4 +75,41 @@ class InMemoryAccessTokenRepository(AccessTokenRepository):
         '''
         del self.tokens[id]
 
+
+class DbAccessTokenRepository(AccessTokenRepository):
+
+    def __init__(self, session: Session):
+        self.session = session
+
+
+    def create_token(self, user_id: str) -> AccessToken:
+        '''
+        Creates and adds a new AccessToken instance to the repository
+        '''
+
+        token = AccessToken(
+            id=AccessToken.generate_id(),
+            user_id=user_id,
+            created_at=get_current_time(),
+            time_to_live=AccessToken.default_time_to_live()
+        )
+        self.session.add(token)
+        self.session.commit()
+        return token
+
+
+    def get_token_by_id(self, id: str) -> Optional[AccessToken]:
+        '''
+        Retrieves an access token based on the specified ID
+        '''
+        return self.session.get(AccessToken, id)
+
+
+    def delete_token_by_id(self, id: str) -> None:
+        '''
+        Deletes an access token
+        '''
+        token = self.session.get_user_by_id(id)
+        self.session.delete(token)
+        self.session.commit()
 

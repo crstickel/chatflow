@@ -2,6 +2,8 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+from shared.column import DateTimeUTC
+from shared.time import get_current_time
 
 class Message(BaseModel):
     id: int = Field

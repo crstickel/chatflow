@@ -241,7 +241,8 @@ class DbUserRepository(UserRepository):
         Retrieves a user account based on the specified email address
         '''
         results = self.session.execute(select(User).where(User.email == email))
-        return results.first()
+        user = results.first()
+        return user if user is None else user[0]
 
 
     def get_user_by_username(self, username: str) -> Optional[User]:
@@ -249,7 +250,8 @@ class DbUserRepository(UserRepository):
         Retrieves a user account based on the specified username
         '''
         results = self.session.execute(select(User).where(User.username == username))
-        return results.first()
+        user = results.first()
+        return user if user is None else user[0]
 
 
     def update_user(self, id: str, user: User) -> None:

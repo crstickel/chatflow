@@ -1,14 +1,16 @@
 
 from datetime import datetime, timedelta
-from pydantic import BaseModel
+from sqlmodel import SQLModel, Field, Column
 import secrets
 
 from app.config import settings
+from shared.column import DateTimeUTC
+from shared.time import get_current_time
 
-class AccessToken(BaseModel):
-    id: str
+class AccessToken(SQLModel, table=True):
+    id: str = Field(primary_key=True, default_factory=lambda: AccessToken.generate_id())
     user_id: str
-    created_at: datetime
+    created_at: datetime = Field(default_factory=get_current_time, sa_column=Column(DateTimeUTC))
     time_to_live: int
 
 

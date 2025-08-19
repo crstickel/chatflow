@@ -25,7 +25,7 @@ class AuthService:
 
         # Retrieve the user account specified
         user = self.engine.user_repository.get_user_by_username(username)
-        if not user:
+        if user is None:
             return None
 
         # Verify the provided password
