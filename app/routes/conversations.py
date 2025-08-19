@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter, Depends
-from typing import Any, Annotated
+from typing import Any, Annotated, List
 
 router = APIRouter(prefix='/conversations', tags=['conversations'])
 
@@ -57,14 +57,21 @@ async def get_messages_for_conversation(
     app_engine: Annotated[AppDependencyCollection, Depends(get_engine)],
     current_user: CurrentUserDependency,
     id: str,
-) -> Any:
-    # TODO : this can be sped up and simplified substantially with caching
-    participants = app_engine.membership_repository.get_users_for_conversation(id)
-    names = [app_engine.user_repository.get_user_by_id(x).username for x in participants]
-    participant_names = dict(zip(participants, names))
+    start: int = 0
+) -> List[ConversationMessageDTO]:
+    messages = ConversationService(app_engine).get_messages_for_conversation(id, start=start)
 
-    messages = ConversationService(app_engine).get_messages_for_conversation(id)
-    return [ConversationMessageDTO(**x.model_dump(), sender=participant_names[x.sender_id]) for x in messages]
+    # NOTE: This is a greedy approach, only create the lookup table for usernames if there's new messages
+    # present. This reduces computational workload when clients are polling.
+    if messages:
+        # TODO : this can be sped up and simplified substantially with caching
+        participants = app_engine.membership_repository.get_users_for_conversation(id)
+        names = [app_engine.user_repository.get_user_by_id(x).username for x in participants]
+        participant_names = dict(zip(participants, names))
+
+        return [ConversationMessageDTO(**x.model_dump(), sender=participant_names[x.sender_id]) for x in messages]
+    else:
+        return []
 
 
 @router.post('/{id}/messages')

@@ -59,7 +59,7 @@ class ConversationService:
         return message
 
 
-    def get_messages_for_conversation(self, id: str, start: Optional[int] = None):
-        messages = self.engine.message_repository.get_messages_for_conversation(id)
+    def get_messages_for_conversation(self, id: str, start: int = 0):
+        messages = self.engine.message_repository.get_messages_for_conversation(id, start)
         return messages
 

@@ -18,6 +18,7 @@ class SendMessageDTO(BaseModel):
 
 
 class ConversationMessageDTO(BaseModel):
+    id: int
     created_at: datetime
     sender: str
     sender_id: str

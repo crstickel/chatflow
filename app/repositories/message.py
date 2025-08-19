@@ -69,12 +69,12 @@ class DbMessageRepository(MessageRepository):
 
 
 
-    def get_messages_for_conversation(self, id: str) -> List[Message]:
+    def get_messages_for_conversation(self, id: str, start:int = 0) -> List[Message]:
         '''
         Retrieves all messages for the specified
         '''
 
-        query = select(Message).where(Message.conversation_id == id)
+        query = select(Message).where(Message.conversation_id == id).where(Message.id >= start)
         results = self.session.execute(query)
         return [x[0] for x in results.all()]
 
