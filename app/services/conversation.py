@@ -4,6 +4,7 @@ from typing import Optional, List
 from app.dependencies import AppDependencyCollection
 from app.models.conversation import Conversation
 from app.models.membership import Membership
+from app.models.message import Message
 from app.models.user import User
 
 
@@ -40,4 +41,25 @@ class ConversationService:
     def get_conversation_member_names(self, id: str) -> List[str]:
         user_ids = self.engine.membership_repository.get_users_for_conversation(id)
         return [self.engine.user_repository.get_user_by_id(x).username for x in user_ids]
+
+
+    def post_message_to_conversation(self, id: str, sender: User, content: str) -> Message:
+
+        # Check to ensure the sender is actually allowed in the conversation
+        members = self.engine.membership_repository.get_users_for_conversation(id)
+        if sender.id not in members:
+            raise ValueError(f'{user.username} is not a member of this conversation')
+
+        # Otherwise, post the message
+        message = self.engine.message_repository.create_message(
+            conversation_id=id,
+            sender_id=sender.id,
+            content=content
+        )
+        return message
+
+
+    def get_messages_for_conversation(self, id: str, start: Optional[int] = None):
+        messages = self.engine.message_repository.get_messages_for_conversation(id)
+        return messages
 

@@ -10,6 +10,7 @@ from app.config import settings
 from app.repositories.accesstoken import AccessTokenRepository, DbAccessTokenRepository
 from app.repositories.conversation import ConversationRepository, DbConversationRepository
 from app.repositories.membership import MembershipRepository, DbMembershipRepository
+from app.repositories.message import MessageRepository, DbMessageRepository
 from app.repositories.user import UserRepository, DbUserRepository
 from app.models.user import User
 
@@ -39,9 +40,13 @@ class AppDependencyCollection:
 
 
     @cached_property
+    def message_repository(self) -> MessageRepository:
+        return DbMessageRepository(self.session)
+
+
+    @cached_property
     def token_repository(self) -> AccessTokenRepository:
         return DbAccessTokenRepository(self.session)
-
 
     @cached_property
     def user_repository(self) -> UserRepository:

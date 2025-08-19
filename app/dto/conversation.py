@@ -12,3 +12,13 @@ class NewConversationRequestDTO(BaseModel):
     name: str
     participants: list[str]
 
+
+class SendMessageDTO(BaseModel):
+    content: str
+
+
+class ConversationMessageDTO(BaseModel):
+    created_at: datetime
+    sender: str
+    sender_id: str
+    content: str
