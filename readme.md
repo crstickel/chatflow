@@ -5,7 +5,7 @@ Hello and welcome to my janky attempt at ChatFlow!
 ## Installation
 
 You will require the following dependencies:
-- Docker
+- Python3.11
 - uv and uvx: for instructions, see [link](https://docs.astral.sh/uv/getting-started/installation/#installation-methods)
 
 Create a virtual environment using the following command:
