@@ -1,10 +1,9 @@
 
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Relationship
+from pydantic import BaseModel
 
-from .conversation import Conversation
 
-class Message(SQLModel, table=true):
+class Message(BaseModel):
     id: int = Field
     conversation_id: str
     sender_id: str

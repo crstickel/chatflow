@@ -2,7 +2,7 @@
 from email_validator import validate_email, EmailNotValidError
 from typing import Optional
 
-from app.dependencies import engine, AppDependencyCollection
+from app.dependencies import AppDependencyCollection
 from app.models.accesstoken import AccessToken
 from app.models.user import User
 

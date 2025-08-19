@@ -1,7 +1,7 @@
 
 from typing import Optional, List
 
-from app.dependencies import AppDependencyCollection, engine
+from app.dependencies import AppDependencyCollection
 from app.models.conversation import Conversation
 from app.models.membership import Membership
 from app.models.user import User

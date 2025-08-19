@@ -4,14 +4,14 @@ from typing import Any, Annotated
 
 router = APIRouter(prefix='/conversations', tags=['conversations'])
 
-from app.dependencies import AppDependencyCollection, engine, CurrentUserDependency
+from app.dependencies import get_engine, AppDependencyCollection, CurrentUserDependency
 from app.dto.conversation import PublicConversationDTO, NewConversationRequestDTO
 from app.services.conversation import ConversationService
 
 
 @router.get('/')
 async def list_conversations(
-    app_engine: Annotated[AppDependencyCollection, Depends(engine)],
+    app_engine: Annotated[AppDependencyCollection, Depends(get_engine)],
     current_user: CurrentUserDependency
 ) -> Any:
     service = ConversationService(app_engine)
@@ -30,7 +30,7 @@ async def list_conversations(
 
 @router.post('/', response_model=PublicConversationDTO)
 async def new_conversation(
-    app_engine: Annotated[AppDependencyCollection, Depends(engine)],
+    app_engine: Annotated[AppDependencyCollection, Depends(get_engine)],
     current_user: CurrentUserDependency,
     body: NewConversationRequestDTO
 ) -> Any:

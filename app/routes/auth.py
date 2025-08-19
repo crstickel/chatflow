@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated, Any
 
-from app.dependencies import engine, AppDependencyCollection
+from app.dependencies import get_engine, AppDependencyCollection
 from app.dto.auth import LoginResponseDTO, RegisterRequestDTO
 from app.dto.user import PublicUserDTO
 from app.services.auth import AuthService
@@ -13,7 +13,7 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 
 @router.post('/login', response_model=LoginResponseDTO)
 async def login(
-    app_engine: Annotated[AppDependencyCollection, Depends(engine)],
+    app_engine: Annotated[AppDependencyCollection, Depends(get_engine)],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Any:
     token = AuthService(app_engine).login_user(
@@ -33,7 +33,7 @@ async def login(
 
 @router.post('/register', response_model=PublicUserDTO)
 async def login(
-    app_engine: Annotated[AppDependencyCollection, Depends(engine)],
+    app_engine: Annotated[AppDependencyCollection, Depends(get_engine)],
     form_data: RegisterRequestDTO
 ) -> Any:
     try:

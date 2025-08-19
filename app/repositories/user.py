@@ -1,5 +1,6 @@
 
 from abc import ABC, abstractmethod
+from sqlmodel import select, func, Session
 from typing import Optional, List
 
 from app.models.user import User
@@ -188,4 +189,86 @@ class InMemoryUserRepository(UserRepository):
 
         user.deleted_at = get_current_time()
         self.update_user(id, user)
+
+
+class DbUserRepository(UserRepository):
+
+    def __init__(self, session: Session):
+        self.session = session
+
+
+    def create_user(self, username: str, email: str, pwhash: str, id: Optional[str] = None):
+        '''
+        Creates and adds a new User model instance to the repository
+        Raises a ValueError exception upon ID collision
+        '''
+
+        if id is None:
+            id = User.generate_id()
+
+        user = User(
+            id=id if id is not None else User.generate_id(),
+            username=username,
+            email=email,
+            pwhash=pwhash,
+            created_at=get_current_time(),
+            deleted_at=None
+        )
+
+        self.session.add(user)
+        self.session.commit()
+        return user
+
+
+    def get_num_users(self) -> int:
+        '''
+        Returns the number of users currently being stored in this repository
+        '''
+        statement = select(func.count(User.id))
+        result = self.session.execute(statement)
+        return result.one()
+
+
+    def get_user_by_id(self, id: str) -> Optional[User]:
+        '''
+        Retrieves a user account based on the specified ID
+        '''
+        return self.session.get(User, id)
+
+
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        '''
+        Retrieves a user account based on the specified email address
+        '''
+        results = self.session.execute(select(User).where(User.email == email))
+        return results.first()
+
+
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        '''
+        Retrieves a user account based on the specified username
+        '''
+        results = self.session.execute(select(User).where(User.username == username))
+        return results.first()
+
+
+    def update_user(self, id: str, user: User) -> None:
+        '''
+        Updates a user's data in the repository.
+        Raises:
+        - KeyError if the user cannot be found
+        - ValueError if the 'id' field changes
+        '''
+        self.session.add(user)
+        self.session.commit()
+
+
+    def delete_user_by_id(self, id: str) -> None:
+        '''
+        Deletes a user
+        Raises: KeyError if the user cannot be found
+        '''
+        user = self.get_user_by_id(id)
+        self.session.delete(user)
+        self.session.commit()
 

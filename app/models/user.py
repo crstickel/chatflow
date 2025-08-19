@@ -1,11 +1,12 @@
 
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
+from sqlmodel import SQLModel, Field
 from typing import Optional
 import uuid
 
-class User(BaseModel):
-    id: str
+class User(SQLModel, table=True):
+    id: str = Field(primary_key=True, default_factory=lambda: User.generate_id())
     username: str
     email: EmailStr
     pwhash: str

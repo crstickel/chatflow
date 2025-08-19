@@ -2,12 +2,15 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from functools import cached_property
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlmodel import create_engine, Session
 from typing import Annotated, Self
 
+from app.config import settings
 from app.repositories.accesstoken import AccessTokenRepository, InMemoryAccessTokenRepository
 from app.repositories.conversation import ConversationRepository, InMemoryConversationRepository
 from app.repositories.membership import MembershipRepository, InMemoryMembershipRepository
-from app.repositories.user import UserRepository, InMemoryUserRepository
+from app.repositories.user import UserRepository, InMemoryUserRepository, DbUserRepository
 from app.models.user import User
 
 from shared.time import get_current_time
@@ -19,25 +22,36 @@ from shared.time import get_current_time
 #
 ###################################################################################################
 
+# In-memory repositories
+_conversation_repository = InMemoryConversationRepository()
+_membership_repository = InMemoryMembershipRepository()
+_token_repository = InMemoryAccessTokenRepository()
+_user_repository = InMemoryUserRepository()
+
 class AppDependencyCollection:
 
-    @cached_property
+    def __init__(self, session: Session):
+        self.session = session
+
+
+    @property
     def conversation_repository(self) -> ConversationRepository:
-        return InMemoryConversationRepository()
+        return _conversation_repository
 
-    @cached_property
+
+    @property
     def membership_repository(self) -> MembershipRepository:
-        return InMemoryMembershipRepository()
+        return _membership_repository
 
 
-    @cached_property
+    @property
     def token_repository(self) -> AccessTokenRepository:
-        return InMemoryAccessTokenRepository()
+        return _token_repository
 
 
     @cached_property
     def user_repository(self) -> UserRepository:
-        return InMemoryUserRepository()
+        return DbUserRepository(self.session)
 
 
     def __call__(self) -> Self:
@@ -49,14 +63,31 @@ class AppDependencyCollection:
         return self
 
 
-engine = AppDependencyCollection()
-
 
 ###################################################################################################
 #
 #   FastAPI Dependency-Injected Helpers
 #
 ###################################################################################################
+
+db_engine = create_engine(settings.DB_URL)
+SessionFactory = sessionmaker(bind=db_engine, autoflush=False, autocommit=False)
+
+def get_engine():
+    '''
+    Retrieves the current application dependency container (aka "engine")
+    '''
+    session = SessionFactory()
+    try:
+        app_engine = AppDependencyCollection(session)
+        yield app_engine
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
 
 # Specifies our desired OAuth2 access scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
@@ -69,7 +100,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
 AccessTokenDependency = Annotated[str, Depends(oauth2_scheme)]
 
 def get_user_from_token(
-    app_engine: Annotated[AppDependencyCollection, Depends(engine)],
+    app_engine: Annotated[AppDependencyCollection, Depends(get_engine)],
     token: AccessTokenDependency
 ) -> User:
     '''
