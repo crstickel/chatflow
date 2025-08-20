@@ -85,7 +85,8 @@ I know can cause a viceral reaction in Rubyists :-)
 As for data storage, the repository pattern results in a great deal of flexibility but I
 chose Sqlite as it forces the design to consider databases and connection management and
 disallows some shortcuts and liberties that can be taken if you don't have to worry about
-supporting a DB.
+supporting a DB. However, there are unique constraints and indexing that could be done to
+both improve stability and performance.
 
 
 ## Client Support
