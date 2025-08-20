@@ -66,7 +66,7 @@ Specific patterns include:
   granularity regarding how models are stored and accessed: you can keep some tables in
   local memory, others in a Key-Value store like Redis, others on a RDBMS and still
   others in a NoSQL DB as you project needs evolve. 
-- Application Container/Engine - this bascially houses all your dependencies (mainly
+- Application Container/Engine - this basically houses all your dependencies (mainly
   repositories in this example) in a single container that can be injected into your
   controllers and services. This dependency injection allows for some *serious* testing
   advantages, which alas, I did not have time to demonstrate.
@@ -76,7 +76,7 @@ Specific patterns include:
 
 I know you're a Ruby shop and I think Rails would be much faster to develop this with,
 but I chose Python and FastAPI as it is the tooling that is freshest in my mind at time
-of writing; because of the superficial similarities between Ruby and Pythonm, I did not
+of writing; because of the superficial similarities between Ruby and Python, I did not
 want to spend a ton of time relearning under a time-crunch.
 
 This resulted in a *lot* more boilerplate (especially with the patterns I adopted) - and
@@ -145,6 +145,8 @@ following means:
 - reference implementation for particular modules and approaches
 - answering RTFM-eliciting questions about how to use libraries
 - stress-testing design decisions
+
+I used both Claude and GTP-5.
 
 
 # Activity Log
