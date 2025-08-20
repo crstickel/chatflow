@@ -114,6 +114,9 @@ about websockets, SSEs, long-polling, etc -  I err'ed on the side of simplicity:
       update frequency if a conversation is stale or inactive or if participants are
       offline.
 
+That being said, short-polling is not something I'd want to keep using much beyond the
+MVP stage of a project like this.
+
 ## How to Scale
 
 Because of how this system is setup, data can be partitioned by repository: every model
@@ -145,6 +148,9 @@ following means:
 
 
 # Activity Log
+
+*NOTE: I exceeded the four hour time limit. An accounting of my time is listed below*
+
 - 2025-08-18 10:05:00 to 13:30 (3.5 hours) - initial session
     - repo setup, initial project structure, user accounts, OAuth workflow
 - 2025-08-18 15:00 to 16:00 (1.0 hours) - Conversations, Membership, /conversations endpoints
